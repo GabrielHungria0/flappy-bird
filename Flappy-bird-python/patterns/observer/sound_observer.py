@@ -1,23 +1,23 @@
 from typing import List
-from config import AssetPaths
 from patterns.event import CollisionEvent, Event, JumpEvent
 from patterns.observer.abstract_game_event_observer import AbstractGameEventObserver
 from patterns.service.sound_service import SoundService
 
-
 class SoundObserver(AbstractGameEventObserver):
-    def __init__(self):
+    def __init__(self, resource_facade):
         self._sound_service = SoundService()
-    
+        self._resource_facade = resource_facade
+
     def update(self, event: Event):
         sound_map = {
-            CollisionEvent: (AssetPaths.HIT_SOUND, "hit"),
-            JumpEvent: (AssetPaths.WING_SOUND, "wing")
+            CollisionEvent: "hit",
+            JumpEvent: "wing"
         }
-        
-        sound_data = sound_map.get(type(event))
-        if sound_data:
-            self._sound_service.play(*sound_data)
-    
+        sound_name = sound_map.get(type(event))
+        if sound_name:
+            sound_asset = self._resource_facade.get_sound(sound_name)
+            if sound_asset:
+                self._sound_service.play(sound_asset, sound_name)
+                
     def get_event_types(self) -> List[type]:
         return [CollisionEvent, JumpEvent]

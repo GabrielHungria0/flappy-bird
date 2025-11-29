@@ -1,54 +1,27 @@
 import pygame
-from config import GameConfig, AssetPaths
-
+from game.managers.resource_manager import ResourceManager
+from patterns.loader.asset_loader import AssetLoader
 
 class ResourceFacade:
-    _instance = None
-    
-    def __new__(cls):
-        if cls._instance is None:
-            cls._instance = super().__new__(cls)
-            cls._instance._initialized = False
-        return cls._instance
-    
     def __init__(self):
-        if not self._initialized:
-            self._images = {}
-            self._sounds = {}
-            self._initialized = True
-    
+        self._resource_manager = ResourceManager()
+        self._asset_loader = AssetLoader()
+
     def get_bird_images(self):
-        if "bird_sprites" not in self._images:
-            self._load_bird_images()
-        return self._images["bird_sprites"]
+        return self._resource_manager.load_bird_sprites()
     
     def get_image(self, name):
-        key_map = {
-            "pipe": AssetPaths.PIPE_SPRITE,
-            "ground": AssetPaths.GROUND_SPRITE,
-            "background": AssetPaths.BACKGROUND_SPRITE,
-            "message": AssetPaths.MESSAGE_SPRITE
+        image_methods = {
+            "pipe": self._resource_manager.load_pipe_sprite,
+            "ground": self._resource_manager.load_ground_sprite,
+            "background": self._resource_manager.load_background_sprite,
+            "message": self._resource_manager.load_message_sprite
         }
-        
-        if name not in self._images and name in key_map:
-            self._images[name] = pygame.image.load(key_map[name]).convert_alpha()
-        
-        return self._images.get(name)
+        method = image_methods.get(name)
+        return method() if method else None
     
     def get_sound(self, name):
-        key_map = {
-            "wing": AssetPaths.WING_SOUND,
-            "hit": AssetPaths.HIT_SOUND
-        }
-        return key_map.get(name)
-    
-    def get_scaled_background(self, width, height):
-        bg = self.get_image("background")
-        return pygame.transform.scale(bg, (width, height))
-    
-    def _load_bird_images(self):
-        self._images["bird_sprites"] = [
-            pygame.image.load(AssetPaths.BIRD_UP_SPRITE).convert_alpha(),
-            pygame.image.load(AssetPaths.BIRD_MID_SPRITE).convert_alpha(),
-            pygame.image.load(AssetPaths.BIRD_DOWN_SPRITE).convert_alpha()
-        ]
+        sound_path = self._resource_manager.get_sound_path(name)
+        if sound_path:
+            return self._asset_loader.load_sound(sound_path)
+        return None
