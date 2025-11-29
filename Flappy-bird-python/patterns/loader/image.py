@@ -1,12 +1,27 @@
 import pygame
+from patterns.loader.asset import Asset
 
 
-class ImageAsset:
+class ImageAsset(Asset):
     def __init__(self, path: str):
-        self.path = path
-        self.pgImage = pygame.image.load(path).convert_alpha()
-        self.width = self.pgImage.get_width()
-        self.height = self.pgImage.get_height()
-
+        self._path = path
+        self._image = pygame.image.load(path).convert_alpha()
+    
+    @property
+    def path(self):
+        return self._path
+    
+    @property
+    def image(self):
+        return self._image
+    
+    @property
+    def width(self):
+        return self._image.get_width()
+    
+    @property
+    def height(self):
+        return self._image.get_height()
+    
     def get_rect(self):
-        return self.pgImage.get_rect()
+        return self._image.get_rect()

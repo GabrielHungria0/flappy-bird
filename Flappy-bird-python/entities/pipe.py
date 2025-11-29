@@ -1,30 +1,46 @@
-"""
-Entidade Pipe (Cano)
-"""
-
 import pygame
-from config import PIPE_WIDTH, PIPE_HEIGTH, SCREEN_HEIGHT, GAME_SPEED
+from config import GameConfig
 
 
 class Pipe(pygame.sprite.Sprite):
-
     def __init__(self, inverted, xpos, ysize, resource_facade):
         pygame.sprite.Sprite.__init__(self)
-
+        
+        self._config = GameConfig()
+        self._inverted = inverted
+        self.pair_id = None
+        
+        self._setup_image(resource_facade)
+        self._setup_position(xpos, ysize)
+    
+    def _setup_image(self, resource_facade):
         self.image = resource_facade.get_image("pipe")
-        self.image = pygame.transform.scale(self.image, (PIPE_WIDTH, PIPE_HEIGTH))
-
+        self.image = pygame.transform.scale(
+            self.image, 
+            (self._config.PIPE_WIDTH, self._config.PIPE_HEIGHT)
+        )
+        
+        if self._inverted:
+            self.image = pygame.transform.flip(self.image, False, True)
+        
+        self.mask = pygame.mask.from_surface(self.image)
+    
+    def _setup_position(self, xpos, ysize):
         self.rect = self.image.get_rect()
         self.rect[0] = xpos
-
-        if inverted:
-            self.image = pygame.transform.flip(self.image, False, True)
-            self.rect[1] = -(self.rect[3] - ysize)
-        else:
-            self.rect[1] = SCREEN_HEIGHT - ysize
-
-        self.mask = pygame.mask.from_surface(self.image)
-        self.pair_id: str | None = None
-
+        self.rect[1] = self._calculate_y_position(ysize)
+    
+    def _calculate_y_position(self, ysize):
+        if self._inverted:
+            return -(self.rect[3] - ysize)
+        return self._config.SCREEN_HEIGHT - ysize
+    
     def update(self):
-        self.rect[0] -= GAME_SPEED
+        self._move_horizontal()
+        self._move_vertical()
+    
+    def _move_horizontal(self):
+        self.rect[0] -= self._config.GAME_SPEED
+    
+    def _move_vertical(self):
+        pass
