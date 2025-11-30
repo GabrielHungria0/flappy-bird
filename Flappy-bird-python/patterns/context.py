@@ -7,7 +7,7 @@ from patterns.facade import ResourceFacade
 from patterns.factory import PipeFactory
 from game.managers import PipeManager, GroundManager
 from patterns.observer import GameEventSubject, ScoreObserver, SoundObserver
-from game.sprite_manager import SpriteManager
+from game.managers.sprite_manager import SpriteManager
 from patterns.state.game_over_state import GameOverState
 from patterns.state.menu_state import MenuState
 from patterns.state.playing_state import PlayingState

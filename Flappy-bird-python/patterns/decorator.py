@@ -39,7 +39,7 @@ class InvincibleBirdDecorator(BirdDecorator):
             self._is_invincible = False
     
     def _apply_visual_effect(self):
-        self._decorated_bird.image.set_alpha(200)
+        self._decorated_bird.image.set_alpha(100)
     
     def can_collide(self):
         if self._is_invincible:
