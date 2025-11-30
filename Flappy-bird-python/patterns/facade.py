@@ -1,43 +1,27 @@
 import pygame
-from config import *
-
+from game.managers.resource_manager import ResourceManager
+from patterns.loader.asset_loader import AssetLoader
 
 class ResourceFacade:
-
     def __init__(self):
-        self.images = {}
-        self.sounds = {}
-        self._load_resources()
-
-    def _load_resources(self):
-        """Carrega todos os recursos do jogo"""
-        self.images["bird_up"] = pygame.image.load(BIRD_UP_SPRITE).convert_alpha()
-        self.images["bird_mid"] = pygame.image.load(BIRD_MID_SPRITE).convert_alpha()
-        self.images["bird_down"] = pygame.image.load(BIRD_DOWN_SPRITE).convert_alpha()
-
-        self.images["pipe"] = pygame.image.load(PIPE_SPRITE).convert_alpha()
-        self.images["ground"] = pygame.image.load(GROUND_SPRITE).convert_alpha()
-        self.images["background"] = pygame.image.load(BACKGROUND_SPRITE)
-        self.images["message"] = pygame.image.load(MESSAGE_SPRITE).convert_alpha()
-
-        self.sounds["wing"] = WING_SOUND
-        self.sounds["hit"] = HIT_SOUND
+        self._resource_manager = ResourceManager()
+        self._asset_loader = AssetLoader()
 
     def get_bird_images(self):
-        return [
-            self.images["bird_up"],
-            self.images["bird_mid"],
-            self.images["bird_down"],
-        ]
-
+        return self._resource_manager.load_bird_sprites()
+    
     def get_image(self, name):
-        return self.images.get(name)
-
+        image_methods = {
+            "pipe": self._resource_manager.load_pipe_sprite,
+            "ground": self._resource_manager.load_ground_sprite,
+            "background": self._resource_manager.load_background_sprite,
+            "message": self._resource_manager.load_message_sprite
+        }
+        method = image_methods.get(name)
+        return method() if method else None
+    
     def get_sound(self, name):
-        return self.sounds.get(name)
-
-    def get_scaled_background(self, width, height):
-        return pygame.transform.scale(self.images["background"], (width, height))
-
-    def get_scaled_ground(self, width, height):
-        return pygame.transform.scale(self.images["ground"], (width, height))
+        sound_path = self._resource_manager.get_sound_path(name)
+        if sound_path:
+            return self._asset_loader.load_sound(sound_path)
+        return None

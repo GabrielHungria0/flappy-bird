@@ -1,4 +1,4 @@
-from facade import main
+from patterns.game_application import GameApplication
 
 if __name__ == "__main__":
-    main()
+    GameApplication().run()

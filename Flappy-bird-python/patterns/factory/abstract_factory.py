@@ -2,26 +2,38 @@ from abc import ABC, abstractmethod
 import random
 from typing import List
 import uuid
-
-from config import PIPE_GAP, SCREEN_HEIGHT
+from config import GameConfig
 from entities.pipe import Pipe
 
 
 class ObstacleFactory(ABC):
-
+    def __init__(self):
+        self._config = GameConfig()
+    
     @abstractmethod
     def create_obstacle(self, xpos, resource_facade) -> List[Pipe]:
         pass
+    
+    def _generate_random_size(self):
+        return random.randint(100, 300)
+    
+    def _create_pipe_pair_id(self):
+        return uuid.uuid4().hex
+    
+    def _assign_pair_id(self, pipes, pair_id):
+        for pipe in pipes:
+            pipe.pair_id = pair_id
 
 
 class PipeFactory(ObstacleFactory):
-
     def create_obstacle(self, xpos, resource_facade) -> List[Pipe]:
-        size = random.randint(100, 300)
+        size = self._generate_random_size()
+        gap = self._config.PIPE_GAP
+        
         pipe_bottom = Pipe(False, xpos, size, resource_facade)
-        pipe_top = Pipe(True, xpos, SCREEN_HEIGHT - size - PIPE_GAP, resource_facade)
-        # Marca o par com um id único para facilitar contagem
-        pair_id = uuid.uuid4().hex
-        pipe_bottom.pair_id = pair_id
-        pipe_top.pair_id = pair_id
+        pipe_top = Pipe(True, xpos, self._config.SCREEN_HEIGHT - size - gap, resource_facade)
+        
+        pair_id = self._create_pipe_pair_id()
+        self._assign_pair_id([pipe_bottom, pipe_top], pair_id)
+        
         return [pipe_bottom, pipe_top]

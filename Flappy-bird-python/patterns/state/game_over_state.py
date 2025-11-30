@@ -1,40 +1,46 @@
 from pygame import K_RETURN, K_SPACE, KEYDOWN
 import pygame
 from patterns.state import GameState
-from patterns.state.menu_state import MenuState
 
 
 class GameOverState(GameState):
-
+    def __init__(self):
+        self._font_large = pygame.font.Font(None, 74)
+        self._font_medium = pygame.font.Font(None, 48)
+        self._font_small = pygame.font.Font(None, 36)
+    
     def handle_input(self, game_context, event):
-        if event.type == KEYDOWN:
-            if event.key == K_SPACE or event.key == K_RETURN:
-                game_context.reset_game()
-                game_context.set_menu()
-
+        if event.type == KEYDOWN and self._is_restart_key(event.key):
+            game_context.reset_game()
+            game_context.set_menu()
+    
+    def _is_restart_key(self, key):
+        return key in (K_SPACE, K_RETURN)
+    
     def update(self, game_context):
         pass
-
+    
     def render(self, game_context, screen):
+        self._render_background(game_context, screen)
+        self._render_game_over_text(screen)
+        self._render_score(game_context, screen)
+        self._render_instructions(screen)
+    
+    def _render_background(self, game_context, screen):
         screen.blit(game_context.background, (0, 0))
-        game_context.bird_group.draw(screen)
-        game_context.pipe_group.draw(screen)
-        game_context.ground_group.draw(screen)
-
-        # Texto de Game Over
-        font = pygame.font.Font(None, 74)
-        text = font.render("GAME OVER", True, (255, 0, 0))
+        game_context.sprite_manager.draw_group("bird", screen)
+        game_context.sprite_manager.draw_group("pipes", screen)
+        game_context.sprite_manager.draw_group("ground", screen)
+    
+    def _render_game_over_text(self, screen):
+        text = self._font_large.render("GAME OVER", True, (255, 0, 0))
         screen.blit(text, (50, 200))
-
-        # Pontuação final
+    
+    def _render_score(self, game_context, screen):
         score = game_context.score_observer.get_score()
-        font_score = pygame.font.Font(None, 48)
-        text_score = font_score.render(f"Score: {score}", True, (255, 255, 255))
-        screen.blit(text_score, (120, 280))
-
-        # Instruções
-        font_small = pygame.font.Font(None, 36)
-        text_restart = font_small.render(
-            "Press SPACE to restart", True, (255, 255, 255)
-        )
-        screen.blit(text_restart, (60, 350))
+        text = self._font_medium.render(f"Score: {score}", True, (255, 255, 255))
+        screen.blit(text, (120, 280))
+    
+    def _render_instructions(self, screen):
+        text = self._font_small.render("Press SPACE to restart", True, (255, 255, 255))
+        screen.blit(text, (60, 350))
